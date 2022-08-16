@@ -30,6 +30,23 @@ def get_on_month_of_year(df, year: int, month: int, day=1):
               (df['creationDate'].dt.month == date.month)]
 
 
+# TODO all stats have value, date, and unit as important features;  probably want to return series instead of df
+def get_daily_stat(records, year: int, month: int, day: int, match: str):
+    cond = records['type'] == match
+    data = get_record_type(records, cond)
+    daily = get_on_date(data, year, month, day)
+    return daily
+
+
+def get_monthly_stat(records, year: int, month: int, match: str):
+    cond = records['type'] == match
+    data = get_record_type(records, cond)
+    monthly = get_on_month_of_year(data, year, month)
+    return monthly
+
+
+# TODO split into their own energy types and make a new total_cal method to
+# TODO keep consistency across get_monthly of all kinds of types
 # calories
 def get_daily_calories(records, year: int, month: int, day: int):
     cond = (records['type'] == 'BasalEnergyBurned') | \
@@ -39,8 +56,7 @@ def get_daily_calories(records, year: int, month: int, day: int):
     return total_cal
 
 
-# TODO split into their own energy types and make a new total_cal method to
-# TODO keep consistency accros get_monthly of all kinds of types
+# calories
 def get_monthly_calories(records, year: int, month: int):
     cond = (records['type'] == 'BasalEnergyBurned') | \
            (records['type'] == 'ActiveEnergyBurned')
