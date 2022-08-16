@@ -1,26 +1,52 @@
 import pandas as pd
+import datetime as dt
+
+
+# create
+def get_record_type(records, cond):
+    return records[cond]
 
 
 # dates
-def get_range_from_to(df, start, end):
+def get_range_from_to(df, start, end):  # TODO utc affect range
     start = pd.to_datetime(start, utc=True)
     end = pd.to_datetime(end, utc=True)
-    workouts = df[df['creationDate'] >= start]
-    workouts = workouts[workouts['creationDate'] <= end]
+    data = df[df['creationDate'] >= start]
+    data = data[data['creationDate'] <= end]
 
-    return workouts
+    return data
 
 
 # dates
-def get_on_date(df, date):
-    ##  date = pd.to_datetime(dt.date(2022,7,1), utc=True)
+def get_on_date(df, year: int, month: int, day: int):
+    date = pd.to_datetime(dt.date(year, month, day), utc=True)
     return df[df['creationDate'].dt.date == date]
 
 
 # dates
-def get_on_month_of_year(df, date):
+def get_on_month_of_year(df, year: int, month: int, day=1):
+    date = pd.to_datetime(dt.date(year, month, day), utc=True)
     return df[(df['creationDate'].dt.year == date.year) &
               (df['creationDate'].dt.month == date.month)]
+
+
+# calories
+def get_daily_calories(records, year: int, month: int, day: int):
+    cond = (records['type'] == 'BasalEnergyBurned') | \
+           (records['type'] == 'ActiveEnergyBurned')
+    calories = get_record_type(records, cond)
+    total_cal = get_on_date(calories, year, month, day).value.sum()
+    return total_cal
+
+
+# TODO split into their own energy types and make a new total_cal method to
+# TODO keep consistency accros get_monthly of all kinds of types
+def get_monthly_calories(records, year: int, month: int):
+    cond = (records['type'] == 'BasalEnergyBurned') | \
+           (records['type'] == 'ActiveEnergyBurned')
+    calories = get_record_type(records, cond)
+    total_cal = get_on_month_of_year(calories, year, month).value.sum()
+    return total_cal
 
 
 # workouts
