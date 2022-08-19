@@ -6,7 +6,7 @@ root = tree.getroot()
 BAD_FEATURES = ['sourceVersion', 'device']
 
 
-# TODO drop  sourceVersion, device
+# TODO update_df when a new xml file with updated values is added
 def create_df(record_type: str):
     """
     'Record' or 'Workout'
@@ -40,7 +40,7 @@ def clean_record_df(df: pd.DataFrame):
 
     watch_fix(df)
 
-    return df.drop(BAD_FEATURES)
+    return df.drop(columns=BAD_FEATURES)
 
 
 def clean_workout_df(df: pd.DataFrame):
@@ -59,7 +59,7 @@ def clean_workout_df(df: pd.DataFrame):
 
     watch_fix(df)
 
-    return df.drop(BAD_FEATURES)
+    return df.drop(columns=BAD_FEATURES)
 
 
 
