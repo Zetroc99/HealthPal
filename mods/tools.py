@@ -1,8 +1,7 @@
 import pandas as pd
 import datetime as dt
-from pandas import DataFrame
 
-
+# TODO sum monthly
 # TODO merge workout and record tables?
 # TODO split Records types into their own csv files
 # TODO set workout related functions in a separate file ?
@@ -21,14 +20,14 @@ RECORD_TYPES = ['Height', 'BodyMass', 'HeartRate', 'RespiratoryRate',
 
 
 # create
-def get_type(records: pd.DataFrame, cond: pd.Series) -> pd.DataFrame:
+def get_type(df: pd.DataFrame, cond: pd.Series) -> pd.DataFrame:
     """
     Filters dataframe based around the 'type' feature
-    :param records: Record dataFrame
+    :param df: Record dataFrame
     :param cond: boolean Series
     :return: dataframe of a specific 'type'
     """
-    return records[cond]
+    return df[cond]
 
 
 # dates
@@ -225,8 +224,9 @@ def get_totalEnergyBurned(workout: pd.Series) -> float:
     """
     return workout['totalEnergyBurned']
 
+# math
 
-# cleaning
+
 def remove_outliers(df: pd.DataFrame, columns: list, n_std: float) \
         -> pd.DataFrame:
     """

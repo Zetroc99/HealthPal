@@ -10,8 +10,8 @@ BAD_FEATURES = ['sourceVersion', 'device']
 def create_df(record_type: str):
     """
     'Record' or 'Workout'
-    :param record_type:
-    :return:
+    :param record_type: str of the above
+    :return: DataFrame
     """
     data_list = [x.attrib for x in root.iter(record_type)]
     data_df = pd.DataFrame(data_list)
@@ -20,47 +20,64 @@ def create_df(record_type: str):
 
 
 def watch_fix(df: pd.DataFrame):
+    """
+    Fixes Apple Watch string value
+    :param df: DataFrame with 'sourceName' feature
+    :return: None
+    """
     df.loc[df['sourceName'] == 'Marlon’s Apple\xa0Watch',
            'sourceName'] = "Apple Watch"
 
 
-def clean_record_df(df: pd.DataFrame):
+def clean_record_df(records: pd.DataFrame) -> pd.DataFrame:
+    """
+    Cleaned Record DataFrame
+    :param records: Record DataFrame
+    :return: clean
+    """
     # to datetime
     for col in ['creationDate', 'startDate', 'endDate']:
-        df[col] = pd.to_datetime(df[col], utc=True)
+        records[col] = pd.to_datetime(records[col], utc=True)
+
+    records['creationDate'] = pd.to_datetime(records['creationDate'].apply(
+        lambda t: t.date()), utc=True)
 
     # value to numeric or nan
-    df['value'] = pd.to_numeric(df['value'], errors='coerce')
-    df['value'] = df['value'].fillna(1.0)
+    records['value'] = pd.to_numeric(records['value'], errors='coerce')
+    records['value'] = records['value'].fillna(1.0)
 
     # shorter abbreviations
-    df['type'] = df['type'].str.replace('HKQuantityTypeIdentifier', '')
-    df['type'] = df['type'].str.replace('HKCategoryTypeIdentifier', '')
-    df['type'] = df['type'].str.replace('HKDataType', '')
+    records['type'] = records['type'].str.replace('HKQuantityTypeIdentifier', '')
+    records['type'] = records['type'].str.replace('HKCategoryTypeIdentifier', '')
+    records['type'] = records['type'].str.replace('HKDataType', '')
 
-    watch_fix(df)
+    watch_fix(records)
 
-    return df.drop(columns=BAD_FEATURES)
+    return records.drop(columns=BAD_FEATURES)
 
 
-def clean_workout_df(df: pd.DataFrame):
-    df['workoutActivityType'] = df[
+def clean_workout_df(workouts: pd.DataFrame) -> pd.DataFrame:
+    """
+    Cleaned Workout DataFrame
+    :param workouts: Workout DataFrame
+    :return: clean
+    """
+    workouts['workoutActivityType'] = workouts[
         'workoutActivityType'].str.replace('HKWorkoutActivityType', '')
-    df = df.rename({"workoutActivityType": "type"}, axis=1)
+    workouts = workouts.rename({"workoutActivityType": "type"}, axis=1)
 
     # to datetime
     for col in ['creationDate', 'startDate', 'endDate']:
-        df[col] = pd.to_datetime(df[col], utc=True)
+        workouts[col] = pd.to_datetime(workouts[col], utc=True)
+
+    workouts['creationDate'] = pd.to_datetime(workouts['creationDate'].apply(
+        lambda t: t.date()), utc=True)
 
     # string to numeric
-    df['duration'] = pd.to_numeric(df['duration'])
-    df['totalEnergyBurned'] = pd.to_numeric(df['totalEnergyBurned'])
-    df['totalDistance'] = pd.to_numeric(df['totalDistance'])
+    workouts['duration'] = pd.to_numeric(workouts['duration'])
+    workouts['totalEnergyBurned'] = pd.to_numeric(workouts['totalEnergyBurned'])
+    workouts['totalDistance'] = pd.to_numeric(workouts['totalDistance'])
 
-    watch_fix(df)
+    watch_fix(workouts)
 
-    return df.drop(columns=BAD_FEATURES)
-
-
-
-
+    return workouts.drop(columns=BAD_FEATURES)
